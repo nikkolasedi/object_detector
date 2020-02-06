@@ -1,0 +1,11 @@
+<launch> 
+
+  <node name="pcl_filter" pkg="object_detector" type="pcl_filter" />
+  
+  <node name="pcl_crop" pkg="object_detector" type="pcl_crop" />
+  
+	<node name="inter_marker" pkg="object_detector" type="inter_marker" />
+	
+	<node type="rviz" name="rviz" pkg="rviz" />
+
+</launch>
