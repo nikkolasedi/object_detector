@@ -27,8 +27,8 @@
  pcl::CropBox<pcl::PCLPointCloud2> boxFilter;
  boxFilter.setInputCloud(cloudPtr);
  boxFilter.setMin(Eigen::Vector4f(0.0, 0.0, 0.0, 0));
- boxFilter.setMax(Eigen::Vector4f(0.3, 0.3, 0.3, 0));
- boxFilter.setTranslation(Eigen::Vector3f(0.0, -0.1, 0.5));
+ boxFilter.setMax(Eigen::Vector4f(0.3, 0.2, 0.3, 0));
+ boxFilter.setTranslation(Eigen::Vector3f(-0.2, 0.3, 0.6));
  boxFilter.filter(cloud_filtered);
 
  // Convert back the type

@@ -30,7 +30,7 @@ int main( int argc, char** argv )
   {
     visualization_msgs::Marker marker;
     // Set the frame ID and timestamp
-    marker.header.frame_id = "/camera5_depth_optical_frame";
+    marker.header.frame_id = "/camera5_link";
     marker.header.stamp = ros::Time::now();
 
     // Set the namespace and id for this marker.  This serves to create a unique ID
