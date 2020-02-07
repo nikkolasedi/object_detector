@@ -21,7 +21,7 @@ tmux send-keys -t real "tmux send-keys -t roscore 'roscore' ENTER" ENTER
 # NAME2
 tmux send-keys -t real "tmux send-keys -t rosbag 'ce object_detector' ENTER" ENTER
 tmux send-keys -t real "tmux send-keys -t rosbag 'cd rosbag' ENTER" ENTER
-tmux send-keys -t real "tmux send-keys -t rosbag 'rosbag play 2_no_hand.bag --loop ' ENTER" ENTER
+tmux send-keys -t real "tmux send-keys -t rosbag 'rosbag play 3_no_hand.bag --loop ' ENTER" ENTER
 # NAME3
 tmux send-keys -t real "tmux send-keys -t pcl_filter 'ce object_detector' ENTER" ENTER
 tmux send-keys -t real "tmux send-keys -t pcl_filter 'rosrun object_detector pcl_filter' ENTER" ENTER
