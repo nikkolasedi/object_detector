@@ -11,7 +11,8 @@ tmux send-keys -t real 'tmux new-window -n rosbag ' ENTER
 tmux send-keys -t real 'tmux new-window -n pcl_filter ' ENTER
 tmux send-keys -t real 'tmux new-window -n pcl_crop ' ENTER
 tmux send-keys -t real 'tmux new-window -n inter_marker ' ENTER
-tmux send-keys -t real 'tmux new-window -n rviz ' ENTER
+tmux send-keys -t real 'tmux new-window -n rviz_1 ' ENTER
+tmux send-keys -t real 'tmux new-window -n rviz_2 ' ENTER
 tmux send-keys -t real 'tmux new-window -n rqt ' ENTER
 
 ## Send the command to each window from window 0
@@ -32,9 +33,12 @@ tmux send-keys -t real "tmux send-keys -t pcl_crop 'rosrun object_detector pcl_c
 tmux send-keys -t real "tmux send-keys -t inter_marker 'ce object_detector' ENTER" ENTER
 tmux send-keys -t real "tmux send-keys -t inter_marker 'rosrun object_detector inter_marker' ENTER" ENTER
 # NAME6
-tmux send-keys -t real "tmux send-keys -t rviz 'ce object_detector' ENTER" ENTER
-tmux send-keys -t real "tmux send-keys -t rviz 'rviz' ENTER" ENTER
+tmux send-keys -t real "tmux send-keys -t rviz_1 'ce object_detector' ENTER" ENTER
+tmux send-keys -t real "tmux send-keys -t rviz_1 'rviz -d ~/.rviz/pcl_only.rviz' ENTER" ENTER
 # NAME7
+tmux send-keys -t real "tmux send-keys -t rviz_2 'ce object_detector' ENTER" ENTER
+tmux send-keys -t real "tmux send-keys -t rviz_2 'rviz -d ~/.rviz/marker_only.rviz' ENTER" ENTER
+# NAME8
 tmux send-keys -t real "tmux send-keys -t rqt 'ce object_detector' ENTER" ENTER
 tmux send-keys -t real "tmux send-keys -t rqt 'rqt_graph' ENTER" ENTER
 
