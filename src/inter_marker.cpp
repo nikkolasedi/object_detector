@@ -1,9 +1,23 @@
 #include <ros/ros.h>
 #include <visualization_msgs/Marker.h>
 #include <std_msgs/Float32.h>
+#include <sstream>
+#include <iostream>
 
 //Create a container
 std_msgs::Float32 push;
+
+//Create a counter
+int counter = 4;
+int lcounter;
+
+//State
+bool state;
+int var;
+
+//Timer
+ros::Time time_last_count;
+double count_timeout = 3.0f;
 
 //Set info_offset_x
 float info_offset_x = 0.05;
@@ -37,20 +51,46 @@ void pcl_callback(const std_msgs::Float32& mval) {
 	push = mval;
 }
 
+void countdown(const ros::TimerEvent&){
+	
+	lcounter = --counter;
+	ROS_INFO("Test");
+	if(lcounter == 1){
+	state = !state;
+	switch(var){
+	case 1: 
+		var = 2;
+		break;
+	case 2:
+		var = 1;
+		break;
+	}
+	}
+	if(push.data < 10.0){state = false;}
+	
+}
+
 
 
 int main( int argc, char** argv )
 {
   ros::init(argc, argv, "inter_marker");
   ros::NodeHandle n;
+  ros::NodeHandle nh;
   //Subscribe to PCL_MVal topic
   ros::Subscriber val_sub = n.subscribe ("PCL_MVal", 1, pcl_callback);
   //Create and define a publisher
   ros::Publisher marker_pub = n.advertise<visualization_msgs::Marker>("visualization_marker", 1);
   
+  state = false;
+  var = 1;
+  
+  
+  
+  
   // Set our initial shape type to be a cylinder
   uint32_t shape = visualization_msgs::Marker::CYLINDER;
-  
+  ros::Timer timer = nh.createTimer(ros::Duration(1.0), countdown);
   // Running at 10Hz
   ros::Rate r(10);
   ros::spinOnce();
@@ -121,47 +161,50 @@ int main( int argc, char** argv )
     
     
     // Change color if having an input
-    if(push.data > 10.0){
-      marker.color = color_white;
-      
-      }else{
-      marker.color = color_blue;
-      
-      }
+    
+    switch(var){ 
+    	case 1: 
+    		marker.color = color_red;
+    		break;
+    	case 2:
+    		marker.color = color_blue;
+    		break;
+    		}
+    		
   
       marker_pub.publish(marker);//Publish the shape
 
 
 		//Create another button
-		marker.id = marker_id++;
-		marker.ns = "inter_marker";
-    marker.type = visualization_msgs::Marker::CYLINDER;
-  	marker.action = visualization_msgs::Marker::ADD;
-  	marker.header.frame_id = "table";
-  	marker.header.stamp = ros::Time();
-  	marker.pose.position.x = info_offset_x + 0.55; //was 0.11
-  	marker.pose.position.y = 0.50; //was 0.68
-  	marker.pose.position.z = 0.01;
-  	marker.pose.orientation.x = 0.0;
-  	marker.pose.orientation.y = 0.0;
-  	marker.pose.orientation.z = 0.0;
-  	marker.pose.orientation.w = 1.0;
+//		marker.id = marker_id++;
+//		marker.ns = "inter_marker";
+//    marker.type = visualization_msgs::Marker::CYLINDER;
+//  	marker.action = visualization_msgs::Marker::ADD;
+//  	marker.header.frame_id = "table";
+//  	marker.header.stamp = ros::Time();
+//  	marker.pose.position.x = info_offset_x + 0.55; //was 0.11
+//  	marker.pose.position.y = 0.50; //was 0.68
+//  	marker.pose.position.z = 0.01;
+//  	marker.pose.orientation.x = 0.0;
+//  	marker.pose.orientation.y = 0.0;
+//  	marker.pose.orientation.z = 0.0;
+//  	marker.pose.orientation.w = 1.0;
 
-  	marker.scale.x = 0.1;
-  	marker.scale.y = 0.1;
-  	marker.scale.z = 0.05;
-  	marker.color = color_red;
-  	
-  	// Change color if having an input
-    if(push.data > 10.0){
-      marker.color = color_white;
-      
-      }else{
-      marker.color = color_red;
-      
-      }
-  
-      marker_pub.publish(marker);
+//  	marker.scale.x = 0.1;
+//  	marker.scale.y = 0.1;
+//  	marker.scale.z = 0.05;
+//  	marker.color = color_red;
+//  	
+//  	// Change color if having an input
+//    if(push.data > 10.0){
+//      marker.color = color_white;
+//      
+//      }else{
+//      marker.color = color_red;
+//      
+//      }
+//  
+//      marker_pub.publish(marker);
 
 
 
@@ -194,6 +237,54 @@ int main( int argc, char** argv )
   
     marker_pub.publish(marker);//Publish the text marker
     
+    // Create a text marker on button
+    marker.id = marker_id++;
+    marker.ns = "inter_marker";
+    marker.type = visualization_msgs::Marker::TEXT_VIEW_FACING;
+    marker.action = visualization_msgs::Marker::ADD;
+    marker.header.frame_id = "table";
+    marker.lifetime = ros::Duration();
+		marker.pose.position.x = info_offset_x + 0.41; //was 0.11
+  	marker.pose.position.y = 0.50; //was 0.68
+  	marker.pose.position.z = 0.1;
+    marker.scale.z = 0.03;
+    marker.color = color_green;
+    
+    
+    //Typecasting int to string
+    std::string out_string;
+		std::stringstream ss;
+		
+ 		
+    if(push.data > 10.0 && lcounter > 1 && state == false){
+    
+    	ss.str("");
+      ss.clear();
+      ss << lcounter;
+		  out_string = ss.str();
+ 		  marker.text = out_string;
+    	
+    	
+    	
+    	}else {
+    	
+    	counter = 4;
+    	ss.str("");
+      ss.clear();
+      ss << lcounter;
+      out_string = ss.str();
+ 		  marker.text = "HOLD";
+ 		  
+    	}
+    	
+//    	if(lcounter == 1){state = !state;}
+    	std::cout<<state<<"\n";
+    	
+    
+    
+    
+   	  
+    marker_pub.publish(marker);//Publish the text marker
     
     ros::spinOnce();
     r.sleep();
