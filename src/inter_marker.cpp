@@ -1,14 +1,18 @@
 #include <ros/ros.h>
 #include <visualization_msgs/Marker.h>
 #include <std_msgs/Float32.h>
+#include <std_msgs/Bool.h>
 #include <sstream>
 #include <iostream>
 
 //Create a container
 std_msgs::Float32 push;
 
+//Create a container
+std_msgs::Bool push_loc;
+
 //Create a counter
-int counter = 4;
+int counter = 30;
 int lcounter;
 
 //State
@@ -51,11 +55,15 @@ void pcl_callback(const std_msgs::Float32& mval) {
 	push = mval;
 }
 
+void loc_callback(const std_msgs::Bool& mval_loc) {
+	push_loc = mval_loc;
+}
+
 void countdown(const ros::TimerEvent&){
 	
 	lcounter = --counter;
 	ROS_INFO("Test");
-	if(lcounter == 1){
+	if(lcounter == 5 && push_loc.data == true){
 	state = !state;
 	switch(var){
 	case 1: 
@@ -66,7 +74,8 @@ void countdown(const ros::TimerEvent&){
 		break;
 	}
 	}
-	if(push.data < 10.0){state = false;}
+	
+	if(push.data < 10.0 || push_loc.data != true){state = false;}
 	
 }
 
@@ -79,6 +88,8 @@ int main( int argc, char** argv )
   ros::NodeHandle nh;
   //Subscribe to PCL_MVal topic
   ros::Subscriber val_sub = n.subscribe ("PCL_MVal", 1, pcl_callback);
+  //Subscribe to loc_pub topic
+  ros::Subscriber loc_sub = n.subscribe ("loc_pub", 1, loc_callback);
   //Create and define a publisher
   ros::Publisher marker_pub = n.advertise<visualization_msgs::Marker>("visualization_marker", 1);
   
@@ -90,7 +101,7 @@ int main( int argc, char** argv )
   
   // Set our initial shape type to be a cylinder
   uint32_t shape = visualization_msgs::Marker::CYLINDER;
-  ros::Timer timer = nh.createTimer(ros::Duration(1.0), countdown);
+  ros::Timer timer = nh.createTimer(ros::Duration(0.1), countdown);
   // Running at 10Hz
   ros::Rate r(10);
   ros::spinOnce();
@@ -123,6 +134,20 @@ int main( int argc, char** argv )
   	marker.color = color_blue;
   
   	marker.lifetime = ros::Duration(LIFETIME_PERMANENT);
+  	
+  	// Change color if having an input
+    
+    switch(var){ 
+    	case 1: 
+    		marker.color = color_red;
+    		break;
+    	case 2:
+    		marker.color = color_blue;
+    		break;
+    		}
+    		
+  
+		marker_pub.publish(marker);//Publish the shape
   	
   	
 //    // Set the frame ID and timestamp
@@ -160,19 +185,7 @@ int main( int argc, char** argv )
 //    marker.lifetime = ros::Duration();
     
     
-    // Change color if having an input
     
-    switch(var){ 
-    	case 1: 
-    		marker.color = color_red;
-    		break;
-    	case 2:
-    		marker.color = color_blue;
-    		break;
-    		}
-    		
-  
-      marker_pub.publish(marker);//Publish the shape
 
 
 		//Create another button
@@ -223,7 +236,7 @@ int main( int argc, char** argv )
     marker.text = "Waiting for Input"; //Display text
     
       // Change text if receiving an input   
-    if(push.data > 10.0){
+    if(push.data > 10.0 && push_loc.data == true){
       
  		  marker.text = "Receive an Input";
     	ROS_INFO("Receive an Input");
@@ -244,47 +257,89 @@ int main( int argc, char** argv )
     marker.action = visualization_msgs::Marker::ADD;
     marker.header.frame_id = "table";
     marker.lifetime = ros::Duration();
-		marker.pose.position.x = info_offset_x + 0.41; //was 0.11
-  	marker.pose.position.y = 0.50; //was 0.68
-  	marker.pose.position.z = 0.1;
-    marker.scale.z = 0.03;
-    marker.color = color_green;
+		marker.pose.position.x = info_offset_x + 0.405; //was 0.11
+  	marker.pose.position.y = 0.495; //was 0.68
+  	marker.pose.position.z = 0.06;
+    marker.scale.z = 0.05;
+    marker.color = color_black;
     
     
     //Typecasting int to string
     std::string out_string;
 		std::stringstream ss;
 		
- 		
-    if(push.data > 10.0 && lcounter > 1 && state == false){
+ 		//Print count down
+    if(push.data > 10.0 && lcounter > 1 && state == false && push_loc.data == true){
     
     	ss.str("");
       ss.clear();
-      ss << lcounter;
+      ss << lcounter/8;
 		  out_string = ss.str();
- 		  marker.text = out_string;
-    	
-    	
+ 		  marker.text = out_string;  	  	
     	
     	}else {
     	
-    	counter = 4;
+    	counter = 30;
     	ss.str("");
       ss.clear();
       ss << lcounter;
       out_string = ss.str();
- 		  marker.text = "HOLD";
+ 		  
+ 		  switch(var){ 
+    	case 1: 
+    		marker.text = "OFF";
+    		break;
+    	case 2:
+    		marker.text = "ON";
+    		break;
+    		}
  		  
     	}
     	
-//    	if(lcounter == 1){state = !state;}
     	std::cout<<state<<"\n";
-    	
-    
-    
-    
+
    	  
     marker_pub.publish(marker);//Publish the text marker
+    
+    
+   // publish TEST Cylinder and publish it by Nikkolas.
+ 	 	marker.id = marker_id++;
+ 	 	marker.ns = "inter_marker";
+  	marker.type = visualization_msgs::Marker::CYLINDER;
+  	marker.action = visualization_msgs::Marker::ADD;
+  	marker.header.frame_id = "table";
+  	marker.header.stamp = ros::Time();
+  	marker.pose.position.x = info_offset_x + 0.40; //was 0.11
+  	marker.pose.position.y = 0.50; //was 0.68
+  	marker.pose.position.z = 0.01;
+  	marker.pose.orientation.x = 0.0;
+  	marker.pose.orientation.y = 0.0;
+  	marker.pose.orientation.z = 0.0;
+  	marker.pose.orientation.w = 1.0;
+  	float size = 1.0;
+  	marker.lifetime = ros::Duration(LIFETIME_PERMANENT);
+  	
+  	//Print count down
+    if(push.data > 10.0 && lcounter > 4 && state == false && push_loc.data == true){
+    
+    	size = lcounter*0.01*size + size;
+    	
+    	}else {
+    	
+ 		  size = 1.0;
+ 		  
+    	}
+    
+    marker.scale.x = size*0.1;
+  	marker.scale.y = size*0.1;
+  	marker.scale.z = 0.03;
+  	marker.color = color_yellow;
+    		
+  
+		marker_pub.publish(marker);//Publish the shape
+    
+    
+    
     
     ros::spinOnce();
     r.sleep();
