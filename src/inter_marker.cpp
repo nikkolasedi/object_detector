@@ -30,7 +30,7 @@ int main( int argc, char** argv )
   {
     visualization_msgs::Marker marker;
     // Set the frame ID and timestamp
-    marker.header.frame_id = "/camera_link";
+    marker.header.frame_id = "/camera5_link";
     marker.header.stamp = ros::Time::now();
 
     // Set the namespace and id for this marker.  This serves to create a unique ID
@@ -67,7 +67,7 @@ int main( int argc, char** argv )
     marker.lifetime = ros::Duration();
     
     // Change color if having an input
-    if(push.data > 10.0){
+    if(push.data > 2.0){
       marker.color.r = 0.0f;
       marker.color.g = 0.0f;
       marker.color.b = 1.0f; //Color Blue
@@ -100,7 +100,7 @@ int main( int argc, char** argv )
     marker.text = "Waiting for Input"; //Display text
     
       // Change text if receiving an input   
-    if(push.data > 10.0){
+    if(push.data > 2.0){
       
  		  marker.text = "Receive an Input";
     	ROS_INFO("Receive an Input");

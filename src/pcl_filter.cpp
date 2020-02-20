@@ -23,7 +23,7 @@ cloud_cb (const sensor_msgs::PointCloud2ConstPtr& cloud_msg)
   // Perform the actual filtering
   pcl::VoxelGrid<pcl::PCLPointCloud2> sor;
   sor.setInputCloud (cloudPtr);
-  sor.setLeafSize (0.01, 0.01, 0.01);
+  sor.setLeafSize (0.1, 0.1, 0.1);
   sor.filter (cloud_filtered);
 
   // Convert to ROS data type
@@ -42,7 +42,7 @@ main (int argc, char** argv)
   ros::NodeHandle nh;
 
   // Create a ROS subscriber for the input point cloud
-  ros::Subscriber sub = nh.subscribe ("camera/depth/points", 1, cloud_cb);
+  ros::Subscriber sub = nh.subscribe ("camera5/depth/points", 1, cloud_cb);
 
   // Create a ROS publisher for the output point cloud
   pub = nh.advertise<sensor_msgs::PointCloud2> ("/Cloud_Filtered", 1);
