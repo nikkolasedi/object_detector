@@ -2,14 +2,13 @@
 
 tmux new-session -d -s real
 
-
 tmux set -g mouse on
 
 # NAME1
 tmux new-window
 tmux rename-window 'roscore'
 tmux send-keys "ce object_detector" ENTER
-tmux send-keys "" ENTER
+tmux send-keys "roslaunch ros_posenet posenet.launch" ENTER
 # NAME2
 tmux split-window -h
 tmux send-keys "ce object_detector" ENTER
@@ -46,7 +45,7 @@ tmux send-keys "rqt_graph" ENTER
 # NAME9
 tmux new-window
 tmux send-keys "ce object_detector" ENTER
-tmux send-keys "roslaunch ros_posenet posenet.launch" ENTER
+#tmux send-keys "roslaunch ros_posenet posenet.launch" ENTER
 # NAME10
 tmux split-window -h
 tmux send-keys "ce object_detector" ENTER
