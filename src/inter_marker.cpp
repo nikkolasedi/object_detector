@@ -75,7 +75,7 @@ void countdown(const ros::TimerEvent&){
 	}
 	}
 	
-	if(push.data < 10.0 || push_loc.data != true){state = false;}
+	if(push.data < 5.0 || push_loc.data != true){state = false;}
 	
 }
 
@@ -209,7 +209,7 @@ int main( int argc, char** argv )
 //  	marker.color = color_red;
 //  	
 //  	// Change color if having an input
-//    if(push.data > 10.0){
+//    if(push.data > 5.0){
 //      marker.color = color_white;
 //      
 //      }else{
@@ -236,7 +236,7 @@ int main( int argc, char** argv )
     marker.text = "Waiting for Input"; //Display text
     
       // Change text if receiving an input   
-    if(push.data > 10.0 && push_loc.data == true){
+    if(push.data > 5.0 && push_loc.data == true){
       
  		  marker.text = "Receive an Input";
     	ROS_INFO("Receive an Input");
@@ -269,7 +269,7 @@ int main( int argc, char** argv )
 		std::stringstream ss;
 		
  		//Print count down
-    if(push.data > 10.0 && lcounter > 1 && state == false && push_loc.data == true){
+    if(push.data > 5.0 && lcounter > 1 && state == false && push_loc.data == true){
     
     	ss.str("");
       ss.clear();
@@ -320,7 +320,7 @@ int main( int argc, char** argv )
   	marker.lifetime = ros::Duration(LIFETIME_PERMANENT);
   	
   	//Print count down
-    if(push.data > 10.0 && lcounter > 4 && state == false && push_loc.data == true){
+    if(push.data > 5.0 && lcounter > 4 && state == false && push_loc.data == true){
     
     	size = lcounter*0.01*size + size;
     	
