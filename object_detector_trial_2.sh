@@ -45,12 +45,17 @@ tmux send-keys "rqt_graph" ENTER
 # NAME9
 tmux new-window
 tmux send-keys "ce object_detector" ENTER
+<<<<<<< HEAD
 #tmux send-keys "roslaunch ros_posenet posenet.launch" ENTER
+=======
+tmux send-keys "" ENTER
+>>>>>>> github/universal_robot
 # NAME10
 tmux split-window -h
 tmux send-keys "ce object_detector" ENTER
-tmux send-keys "cd ~/robot_folders-master/checkout/object_detector/catkin_ws/src/ros_posenet/rosbag" ENTER
-tmux send-keys "rosbag play 4_hand_left.bag --loop" ENTER
+tmux send-keys "cd ~/robot_folders/checkout/object_detector/catkin_ws/src/ros_posenet/rosbag" ENTER
+#tmux send-keys "rosbag play 4_hand_left.bag --loop" ENTER
+tmux send-keys "rosrun uvc_camera uvc_camera_node _device:=/dev/video0" ENTER
 # NAME11
 tmux split-window -v
 tmux send-keys "ce object_detector" ENTER
