@@ -10,6 +10,7 @@ std_msgs::Float32 push;
 
 //Create a container
 std_msgs::Bool push_loc;
+std_msgs::Bool push_robot_running;  
 
 //Create a counter
 int counter = 30;
@@ -17,6 +18,7 @@ int lcounter;
 
 //State
 bool state;
+bool state_rob_run;
 int var;
 
 //Timer
@@ -25,6 +27,9 @@ double count_timeout = 3.0f;
 
 //Set info_offset_x
 float info_offset_x = 0.05;
+
+//Set info_offset_y
+float info_offset_y = 0.03;
 
 //Set lifetime
 double LIFETIME_PERMANENT = 0;
@@ -92,6 +97,8 @@ int main( int argc, char** argv )
   ros::Subscriber loc_sub = n.subscribe ("loc_pub", 1, loc_callback);
   //Create and define a publisher
   ros::Publisher marker_pub = n.advertise<visualization_msgs::Marker>("visualization_marker", 1);
+  //Create and define a publisher
+  ros::Publisher robot_running_pub = n.advertise<std_msgs::Bool>("robot_running", 1);
   
   state = false;
   var = 1;
@@ -108,6 +115,7 @@ int main( int argc, char** argv )
   
   while (ros::ok())
   {
+		
 		// Create a marker
     visualization_msgs::Marker marker;
     int marker_id = 0;
@@ -121,7 +129,7 @@ int main( int argc, char** argv )
   	marker.header.frame_id = "table";
   	marker.header.stamp = ros::Time();
   	marker.pose.position.x = info_offset_x + 0.40; //was 0.11
-  	marker.pose.position.y = 0.50; //was 0.68
+  	marker.pose.position.y = 0.50 + info_offset_y; //was 0.68
   	marker.pose.position.z = 0.01;
   	marker.pose.orientation.x = 0.0;
   	marker.pose.orientation.y = 0.0;
@@ -229,7 +237,7 @@ int main( int argc, char** argv )
     marker.header.frame_id = "table";
     marker.lifetime = ros::Duration();
     marker.pose.position.x = info_offset_x + 0.45;
-    marker.pose.position.y = 0.60;
+    marker.pose.position.y = 0.60 + info_offset_y;
     marker.pose.position.z = 0.01;
     marker.scale.z = 0.03;
     marker.color = color_green;
@@ -258,7 +266,7 @@ int main( int argc, char** argv )
     marker.header.frame_id = "table";
     marker.lifetime = ros::Duration();
 		marker.pose.position.x = info_offset_x + 0.405; //was 0.11
-  	marker.pose.position.y = 0.495; //was 0.68
+  	marker.pose.position.y = 0.495 + info_offset_y; //was 0.68
   	marker.pose.position.z = 0.06;
     marker.scale.z = 0.05;
     marker.color = color_black;
@@ -288,18 +296,24 @@ int main( int argc, char** argv )
  		  switch(var){ 
     	case 1: 
     		marker.text = "OFF";
+    		push_robot_running.data = true;
     		break;
     	case 2:
     		marker.text = "ON";
+    		push_robot_running.data = false;
     		break;
     		}
  		  
     	}
     	
     	std::cout<<state<<"\n";
+    	
+    	state_rob_run = push_robot_running.data;
+    	std::cout<<"push_robot_running.data ="<<state_rob_run<<".\n";
 
    	  
     marker_pub.publish(marker);//Publish the text marker
+    robot_running_pub.publish(push_robot_running);//Publish the value of push_robot_running
     
     
    // publish TEST Cylinder and publish it by Nikkolas.
@@ -310,7 +324,7 @@ int main( int argc, char** argv )
   	marker.header.frame_id = "table";
   	marker.header.stamp = ros::Time();
   	marker.pose.position.x = info_offset_x + 0.40; //was 0.11
-  	marker.pose.position.y = 0.50; //was 0.68
+  	marker.pose.position.y = 0.50 + info_offset_y; //was 0.68
   	marker.pose.position.z = 0.01;
   	marker.pose.orientation.x = 0.0;
   	marker.pose.orientation.y = 0.0;
