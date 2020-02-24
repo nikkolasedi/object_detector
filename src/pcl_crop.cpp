@@ -28,7 +28,7 @@
  boxFilter.setInputCloud(cloudPtr);
  boxFilter.setMin(Eigen::Vector4f(0.0, 0.0, 0.0, 0));
  boxFilter.setMax(Eigen::Vector4f(0.3, 0.2, 0.3, 0));
- boxFilter.setTranslation(Eigen::Vector3f(-0.2, 0.3, 0.6));
+ boxFilter.setTranslation(Eigen::Vector3f(-0.2, 0.3, 0.7));
  boxFilter.filter(cloud_filtered);
 
  // Convert back the type
