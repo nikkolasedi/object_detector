@@ -18,8 +18,8 @@ int lcounter;
 
 //State
 bool state;
-bool state_rob_run;
 int var;
+int temp_var;
 
 //Timer
 ros::Time time_last_count;
@@ -99,7 +99,6 @@ int main( int argc, char** argv )
   ros::Publisher marker_pub = n.advertise<visualization_msgs::Marker>("visualization_marker", 1);
   //Create and define a publisher
   ros::Publisher robot_running_pub = n.advertise<std_msgs::Bool>("robot_running", 1);
-  
   state = false;
   var = 1;
   
@@ -297,25 +296,30 @@ int main( int argc, char** argv )
     	case 1: 
     		marker.text = "OFF";
     		push_robot_running.data = true;
+
     		break;
     	case 2:
     		marker.text = "ON";
     		push_robot_running.data = false;
     		break;
     		}
+    		
+    	
  		  
     	}
     	
-    	std::cout<<state<<"\n";
     	
-    	state_rob_run = push_robot_running.data;
-    	std::cout<<"push_robot_running.data ="<<state_rob_run<<".\n";
-
    	  
     marker_pub.publish(marker);//Publish the text marker
-    robot_running_pub.publish(push_robot_running);//Publish the value of push_robot_running
+		if(temp_var != push_robot_running.data){
+    		robot_running_pub.publish(push_robot_running);//Publish the value of push_robot_running
+    		std::cout<<"push_robot_running.data ="<<push_robot_running.data<<".\n";
+    		}
+    		
+    std::cout<<state<<"\n";
+    temp_var = push_robot_running.data;
     
-    
+
    // publish TEST Cylinder and publish it by Nikkolas.
  	 	marker.id = marker_id++;
  	 	marker.ns = "inter_marker";
