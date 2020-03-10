@@ -57,7 +57,7 @@ tmux send-keys "ce object_detector" ENTER
 tmux send-keys "cd rosbag" ENTER
 tmux send-keys "export ROS_MASTER_URI=http://${ROS_MASTER}:11311" ENTER
 tmux send-keys '${RUN_ROS_IP}' ENTER
-tmux send-keys 'roslaunch realsense2_camera rs_rgbd_xyz.launch camera:=camera5' ENTER
+tmux send-keys 'roslaunch realsense2_camera rs_rgbd_xyz.launch camera:=camera5 enable_color:=true' ENTER
 
 if [ $sample = true ] 
 then
