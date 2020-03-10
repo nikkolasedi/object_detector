@@ -6,14 +6,15 @@
 #include <iostream>
 #include <geometry_msgs/Point.h>
 
-//Create a container
-std_msgs::Float32 push;
 
 //Create a container
 geometry_msgs::Point push_pos;
 
 //Create a container
-std_msgs::Bool push_loc;
+std_msgs::Bool push_loc_1;
+std_msgs::Bool push_loc_2;
+std_msgs::Bool push_1;
+std_msgs::Bool push_2;
 std_msgs::Bool push_robot_running;  
 
 // Temporary Variable
@@ -27,22 +28,22 @@ ros::Time time_last_count;
 double count_timeout = 3.0f;
 
 //Set info_offset_x button 1
-float info_offset_x = 0.05;
+float info_offset_x = -0.18;
 
 //Set info_offset_y button 1
-float info_offset_y = 0.03;
+float info_offset_y = -0.3;
 
 //Set info_offset_x button 2
-float info_offset_x_2 = 0.2;
+float info_offset_x_2 = -0.06;
 
 //Set info_offset_y button 2
-float info_offset_y_2 = 0.03;
+float info_offset_y_2 = -0.3;
 
 //Set info_offset_x slider 1
-float info_offset_x_3 = 0.3;
+float info_offset_x_3 = -0.06;
 
 //Set info_offset_y slider 1
-float info_offset_y_3 = 0.03;
+float info_offset_y_3 = 0.02;
 
 //Set lifetime
 double LIFETIME_PERMANENT = 0;
@@ -69,12 +70,20 @@ std_msgs::ColorRGBA color_yellow = createColorRGBA(1.0, 1.0, 0.0, 1.0);
 std_msgs::ColorRGBA color_violet = createColorRGBA(1.0, 0.0, 1.0, 1.0);
 
 //Store the value to the container
-void pcl_callback(const std_msgs::Float32& mval) {
-	push = mval;
+void pcl_callback_1(const std_msgs::Bool& mval) {
+	push_1 = mval;
 }
 
-void loc_callback(const std_msgs::Bool& mval_loc) {
-	push_loc = mval_loc;
+void pcl_callback_2(const std_msgs::Bool& mval) {
+	push_2 = mval;
+}
+
+void loc_callback_1(const std_msgs::Bool& mval_loc) {
+	push_loc_1 = mval_loc;
+}
+
+void loc_callback_2(const std_msgs::Bool& mval_loc) {
+	push_loc_2 = mval_loc;
 }
 
 void pos_callback(const geometry_msgs::Point& mval_pos) {
@@ -83,17 +92,18 @@ void pos_callback(const geometry_msgs::Point& mval_pos) {
 
 class TimeCounter { 
 private: 
-    int counter, lcounter, var;
+    int counter, lcounter, var, button;
     bool state;
   
 public: 
     // Parameterized Constructor 
-    TimeCounter(int counter1, int lcounter1, int var1, bool state1) 
+    TimeCounter(int counter1, int lcounter1, int var1, int button1, bool state1) 
     { 
         counter = counter1; 
         lcounter = lcounter1; 
         var = var1;
         state = state1;
+        button = button1;
     } 
   
     int getCounter() 
@@ -120,20 +130,50 @@ public:
 	
 	lcounter = --counter;
 	ROS_INFO("Test");
-	if(lcounter == 5 && push_loc.data == true){
-	state = !state;
-	switch(var){
-	case 1: 
-		var = 2;
-		break;
-	case 2:
-		var = 1;
-		break;
-	}
-	}
+	if(button == 1)
+	{
+		if(lcounter == 5 && push_loc_1.data == true)
+		{
+			state = !state;
+			switch(var)
+			{
+				case 1: 
+					var = 2;
+					break;
+				case 2:
+					var = 1;
+					break;
+			}
+		}
 	
-	if(push.data < 5.0 || push_loc.data != true){
-	state = false;
+		if(push_1.data == false || push_loc_1.data != true )
+		{
+		state = false;
+		}
+	}
+	else if (button == 2)
+	{
+		if(lcounter == 5 &&  push_loc_2.data == true)
+		{
+			state = !state;
+			switch(var)
+			{
+				case 1: 
+					var = 2;
+					break;
+				case 2:
+					var = 1;
+					break;
+			}
+		}
+	
+		if(push_2.data == false || push_loc_2.data != true)
+		{
+		state = false;
+		}
+	}
+	else
+	{
 	}
 	
 }
@@ -149,9 +189,12 @@ int main( int argc, char** argv )
   ros::NodeHandle n;
   ros::NodeHandle nh;
   //Subscribe to PCL_MVal topic
-  ros::Subscriber val_sub = n.subscribe ("PCL_MVal", 1, pcl_callback);
+  ros::Subscriber val_sub_1 = n.subscribe ("PCL_MVal_1", 1, pcl_callback_1);
+  ros::Subscriber val_sub_2 = n.subscribe ("PCL_MVal_2", 1, pcl_callback_2);
   //Subscribe to loc_pub topic
-  ros::Subscriber loc_sub = n.subscribe ("loc_pub", 1, loc_callback);
+  ros::Subscriber loc_sub_1 = n.subscribe ("loc_pub_1", 1, loc_callback_1);
+  //Subscribe to loc_pub topic
+  ros::Subscriber loc_sub_2 = n.subscribe ("loc_pub_2", 1, loc_callback_2);
   //Subscribe to pose_pub topic
   ros::Subscriber pos_sub = n.subscribe ("pose_pub2", 1, pos_callback);
   //Create and define a publisher
@@ -160,10 +203,10 @@ int main( int argc, char** argv )
   ros::Publisher robot_running_pub = n.advertise<std_msgs::Bool>("robot_running", 1);
   
   //Timer 1
-  TimeCounter t1(30, 1, 1, false);
+  TimeCounter t1(20, 1, 1, 1, false);
   
   //Timer 2
-  TimeCounter t2(30, 1, 1, false);
+  TimeCounter t2(20, 1, 1, 2, false);
   
   // Running at 10Hz
   ros::Timer timer1 = nh.createTimer(ros::Duration(0.1), &TimeCounter::countdown, &t1);
@@ -172,7 +215,7 @@ int main( int argc, char** argv )
   ros::Timer timer2 = nh.createTimer(ros::Duration(0.1), &TimeCounter::countdown, &t2);
   
   //Threshold
-  th = 20;
+  th = 10;
   ros::Time time_last;
 	bool is_new;
 	int pos_last_x;
@@ -243,18 +286,18 @@ int main( int argc, char** argv )
     marker.pose.position.z = 0.01;
     marker.scale.z = 0.03;
     marker.color = color_green;
-    marker.text = "Waiting for Input"; //Display text
+    marker.text = "Press to start"; //Display text
     
       // Change text if receiving an input   
-    if(push.data > 5.0 && push_loc.data == true){
+    if(push_1.data == true && push_loc_1.data == true){
       
- 		  marker.text = "Receive an Input";
-    	ROS_INFO("Receive an Input");
+ 		  marker.text = "Press to stop";
+    	ROS_INFO("Press to stop");
       
     	}else{
       
-    	marker.text = "Waiting for Input";
-    	ROS_INFO("Waiting for Input");
+    	marker.text = "Press to start";
+    	ROS_INFO("Press to start");
       
     	}
   
@@ -267,7 +310,7 @@ int main( int argc, char** argv )
     marker.action = visualization_msgs::Marker::ADD;
     marker.header.frame_id = "table";
     marker.lifetime = ros::Duration();
-		marker.pose.position.x = info_offset_x + 0.405; //was 0.11
+		marker.pose.position.x = info_offset_x + 0.408; //was 0.11
   	marker.pose.position.y = 0.495 + info_offset_y; //was 0.68
   	marker.pose.position.z = 0.06;
     marker.scale.z = 0.05;
@@ -279,18 +322,18 @@ int main( int argc, char** argv )
 		std::stringstream ss;
 		
  		//Print count down
-    if(push.data > 5.0 && t1.getLcounter() > 1 && t1.getState() == false && push_loc.data == true)
+    if(push_1.data == true&& t1.getLcounter() > 1 && t1.getState() == false && push_loc_1.data == true)
     {
     
     	ss.str("");
       ss.clear();
-      ss << t1.getLcounter()/8;
+      ss << t1.getLcounter()/6;
 		  out_string = ss.str();
  		  marker.text = out_string;  	  	
     	
     	}else {
     	
-    	t1.setCounter(30);
+    	t1.setCounter(20);
     	ss.str("");
       ss.clear();
       ss << t1.getLcounter();
@@ -341,7 +384,7 @@ int main( int argc, char** argv )
   	marker.lifetime = ros::Duration(LIFETIME_PERMANENT);
   	
   	//Print count down
-    if(push.data > 5.0 && t1.getLcounter() > 4 && t1.getState() == false && push_loc.data == true){
+    if(push_1.data == true && t1.getLcounter() > 4 && t1.getState() == false && push_loc_1.data == true){
     
     	size = t1.getLcounter()*0.01*size + size;
     	
@@ -416,18 +459,18 @@ int main( int argc, char** argv )
     marker.pose.position.z = 0.01;
     marker.scale.z = 0.03;
     marker.color = color_green;
-    marker.text = "Waiting for Input"; //Display text
+    marker.text = "Press to \nchange speed"; //Display text
     
       // Change text if receiving an input   
-    if(push.data > 5.0 && push_loc.data == true){
+    if(push_2.data == true && push_loc_2.data == true){
       
- 		  marker.text = "Receive an Input";
-    	ROS_INFO("Receive an Input");
+ 		  marker.text = "";
+    	ROS_INFO("Release to \nset the speed");
       
     	}else{
       
-    	marker.text = "Waiting for Input";
-    	ROS_INFO("Waiting for Input");
+    	marker.text = "Press to \nchange speed";
+    	ROS_INFO("Press to \nchange speed");
       
     	}
   
@@ -440,7 +483,7 @@ int main( int argc, char** argv )
     marker.action = visualization_msgs::Marker::ADD;
     marker.header.frame_id = "table";
     marker.lifetime = ros::Duration();
-		marker.pose.position.x = info_offset_x_2 + 0.405; //was 0.11
+		marker.pose.position.x = info_offset_x_2 + 0.408; //was 0.11
   	marker.pose.position.y = 0.495 + info_offset_y_2; //was 0.68
   	marker.pose.position.z = 0.06;
     marker.scale.z = 0.05;
@@ -452,18 +495,18 @@ int main( int argc, char** argv )
 		std::stringstream ss_2;
 		
  		//Print count down
-    if(push.data > 5.0 && t2.getLcounter() > 1 && t2.getState() == false && push_loc.data == true)
+    if(push_2.data == true && t2.getLcounter() > 1 && t2.getState() == false && push_loc_2.data == true)
     {
     
     	ss_2.str("");
       ss_2.clear();
-      ss_2 << t2.getLcounter()/8;
+      ss_2 << t2.getLcounter()/6;
 		  out_string_2 = ss_2.str();
  		  marker.text = out_string_2;  	  	
     	
     	}else {
     	
-    	t2.setCounter(30);
+    	t2.setCounter(20);
     	ss_2.str("");
       ss_2.clear();
       out_string_2 = ss_2.str();
@@ -502,10 +545,10 @@ int main( int argc, char** argv )
   	marker.pose.orientation.z = 0.0;
   	marker.pose.orientation.w = 1.0;
   	float size2 = 1.0;
-  	marker.lifetime = ros::Duration();
+  	marker.lifetime = ros::Duration(LIFETIME_PERMANENT);
   	
   	//Print count down
-    if(push.data > 5.0 && t2.getLcounter() > 4 && t2.getState() == false && push_loc.data == true){
+    if(push_2.data == true && t2.getLcounter() > 4 && t2.getState() == false && push_loc_2.data == true){
     
     	size2 = t2.getLcounter()*0.01*size2 + size2;
     	
@@ -590,7 +633,7 @@ int main( int argc, char** argv )
 		
 		if(t2.getState() == true)
 		{
-		
+		marker.color = color_yellow;
 			if(is_new == true)
 			{
 			time_last = ros::Time::now();
@@ -617,12 +660,41 @@ int main( int argc, char** argv )
 			is_new = true;
 			}
 		}
-		marker.scale.y = 0.1*speed;
+		else 
+		{
+		marker.color = color_red;
+		}
+		marker.scale.y = 0.1*speed+0.01;
 		
 		marker_pub.publish(marker);//Publish the shape
 		
+	
+		// Create a text marker for speed
+    marker.id = marker_id++;
+    marker.ns = "inter_marker";
+    marker.type = visualization_msgs::Marker::TEXT_VIEW_FACING;
+    marker.action = visualization_msgs::Marker::ADD;
+    marker.header.frame_id = "table";
+    marker.lifetime = ros::Duration();
+		marker.pose.position.x = info_offset_x + 0.408; //was 0.11
+  	marker.pose.position.y = 0.495 + info_offset_y; //was 0.68
+  	marker.pose.position.z = 0.06;
+    marker.scale.z = 0.05;
+    marker.color = color_white;
+    
+    
+    //Typecasting int to string
+    std::string out_string_3;
+		std::stringstream ss_3;
 		
-		
+ 		//Print speed
+    ss.str("");
+    ss.clear();
+    ss << speed;
+		out_string = ss.str();
+ 		marker.text = out_string;  	  	
+     	
+    marker_pub.publish(marker);//Publish the text marker
 		
 		
     
