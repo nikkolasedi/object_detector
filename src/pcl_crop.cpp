@@ -15,7 +15,7 @@
  ros::Publisher pcl_mval_pub_2;
  std_msgs::Bool state_1;
  std_msgs::Bool state_2;
- int threshold = 0;
+ int threshold = 100;
 
  //	Function to crop PCL
  void cloud_cb_1 (const sensor_msgs::PointCloud2ConstPtr& cloud_msg)
@@ -33,8 +33,9 @@
  pcl::CropBox<pcl::PCLPointCloud2> boxFilter;
  boxFilter.setInputCloud(cloudPtr);
  boxFilter.setMin(Eigen::Vector4f(0.0, 0.0, 0.0, 0));
- boxFilter.setMax(Eigen::Vector4f(0.3, 0.2, 0.3, 0));
- boxFilter.setTranslation(Eigen::Vector3f(-0.2, 0.5, 1.0));
+ boxFilter.setMax(Eigen::Vector4f(0.15, 0.1, 0.2, 0));
+ boxFilter.setTranslation(Eigen::Vector3f(0.2, 0.35, 0.9));
+ boxFilter.setRotation(Eigen::Vector3f(0.1, 0.0, 0.0));
  boxFilter.filter(cloud_filtered);
 
  // Convert back the type
@@ -43,12 +44,12 @@
  int pcl_count = 0;
  for (sensor_msgs::PointCloud2ConstIterator<float> it(output, "x"); it != it.end(); ++it) {
      // TODO: do something with the values of x, y, z
-	   std::cout << pcl_count << "\n";
+	   //std::cout << pcl_count << "\n";
 	   pcl_count++;
-     std::cout <<  it[0] << "/ ";
-     std::cout <<  it[1]<< "/ ";
-     std::cout <<  it[2]<< "/ ";
-     std::cout << std::endl;
+     //std::cout <<  it[0] << "/ ";
+     //std::cout <<  it[1]<< "/ ";
+     //std::cout <<  it[2]<< "/ ";
+     //std::cout << std::endl;
  }
 
  //Bool
@@ -60,6 +61,8 @@
  		{
  		state_1.data = false;
  }
+ std::cout << "PCL On Button 1 :" << pcl_count << "/ "<< threshold;
+ std::cout << std::endl<< std::endl;
  
 
 
@@ -84,8 +87,9 @@ void cloud_cb_2 (const sensor_msgs::PointCloud2ConstPtr& cloud_msg)
  pcl::CropBox<pcl::PCLPointCloud2> boxFilter;
  boxFilter.setInputCloud(cloudPtr);
  boxFilter.setMin(Eigen::Vector4f(0.0, 0.0, 0.0, 0));
- boxFilter.setMax(Eigen::Vector4f(0.3, 0.2, 0.3, 0));
- boxFilter.setTranslation(Eigen::Vector3f(-0.2, 0.5, 1.0));
+ boxFilter.setMax(Eigen::Vector4f(0.15, 0.1, 0.2, 0));
+ boxFilter.setTranslation(Eigen::Vector3f(0.05, 0.35, 0.9));
+ boxFilter.setRotation(Eigen::Vector3f(0.1, 0.0, 0.0));
  boxFilter.filter(cloud_filtered);
 
  // Convert back the type
@@ -94,12 +98,12 @@ void cloud_cb_2 (const sensor_msgs::PointCloud2ConstPtr& cloud_msg)
  int pcl_count = 0;
  for (sensor_msgs::PointCloud2ConstIterator<float> it(output, "x"); it != it.end(); ++it) {
      // TODO: do something with the values of x, y, z
-	   std::cout << pcl_count << "\n";
+	   //std::cout << pcl_count << "\n";
 	   pcl_count++;
-     std::cout <<  it[0] << "/ ";
-     std::cout <<  it[1]<< "/ ";
-     std::cout <<  it[2]<< "/ ";
-     std::cout << std::endl;
+     //std::cout <<  it[0] << "/ ";
+     //std::cout <<  it[1]<< "/ ";
+     //std::cout <<  it[2]<< "/ ";
+     //std::cout << std::endl;
  }
 
  if(pcl_count > threshold)
@@ -110,7 +114,10 @@ void cloud_cb_2 (const sensor_msgs::PointCloud2ConstPtr& cloud_msg)
  		{
  		state_2.data = false;
  }
-
+ 
+ std::cout << "PCL On Button 2 :" << pcl_count << "/ "<< threshold;
+ std::cout << std::endl<< std::endl<< std::endl;
+ 
  // Publish the data
  pub_2.publish (output);
  pcl_mval_pub_2.publish (state_2);
