@@ -200,11 +200,11 @@ void publishInformation()
       switch(var_1){ 
     	case 1: 
     		marker.text = "Press\nto stop";
-    		ROS_INFO("Press to stop");
+    		//ROS_INFO("Press to stop");
     		break;
     	case 2:
     		marker.text = "Press\nto start";
-    		ROS_INFO("Press to start");
+    		//ROS_INFO("Press to start");
     		break;
     		}
 
@@ -248,10 +248,11 @@ void publishInformation()
     marker_pub.publish(marker);//Publish the text marker
     
 		if(temp_var != push_robot_running.data){
+		    temp_var = push_robot_running.data;
     		robot_running_pub.publish(push_robot_running);//Publish the value of push_robot_running
-    		std::cout<<"push_robot_running.data ="<<push_robot_running.data<<".\n";
+    		std::cout<<"push_robot_running.data ="<<temp_var<<".\n";
     		}
-    temp_var = push_robot_running.data;
+    
     
    // publish a Cylinder for animation, when the button pressed
  	 	marker.id = marker_id++;
@@ -369,12 +370,12 @@ void publishInformation()
     if(compare(push_pcl_2, push_pos_2)){
       
  		  marker.text = "Release to\nset the speed";
-    	ROS_INFO("Release to set the speed");
+    	//ROS_INFO("Release to set the speed");
       
     	}else{
       
     	marker.text = "Press to\nchange speed";
-    	ROS_INFO("Press to change speed");
+    	//ROS_INFO("Press to change speed");
       
     	}
   
@@ -450,7 +451,7 @@ void publishInformation()
   
 		marker_pub.publish(marker);//Publish the shape
 		
-		
+		/*
 		// publish a outer Cube for animation for speed scaling
 		marker.id = marker_id++;
   	marker.type = visualization_msgs::Marker::CUBE;
@@ -459,7 +460,7 @@ void publishInformation()
   	marker.header.stamp = ros::Time();
   	marker.pose.position.x = info_offset_x_3 + 0.40; //was 0.11
   	marker.pose.position.y = 0.48 + info_offset_y_3; //was 0.68
-  	marker.pose.position.z = 0.01;
+  	marker.pose.position.z = 0.005;
   	marker.pose.orientation.x = 0.0;
   	marker.pose.orientation.y = 0.0;
   	marker.pose.orientation.z = 0.0;
@@ -481,13 +482,13 @@ void publishInformation()
     		break;
     	case 2:
 //    		marker.text = "ON";
-		marker.color = color_yellow;
+		marker.color = color_black;
     		break;
     		}
     		
     marker_pub.publish(marker);//Publish the shape
 		
-		
+		*/
 		// publish a inner Cube for animation for speed scaling
 		marker.id = marker_id++;
   	marker.type = visualization_msgs::Marker::CUBE;
@@ -505,46 +506,72 @@ void publishInformation()
   	marker.scale.y = 0.02;
   	marker.scale.z = 0.05;
   	
-  	marker.color = color_yellow;
   
   	marker.lifetime = ros::Duration(LIFETIME_PERMANENT);
-  	
-  	int pos_last_x , pos_last_y;
+  	/*
+  	int pos_last_y;
 		
 		if(compare(push_pcl_2, push_pos_2))
 		{
-		marker.color = color_yellow;
+		  marker.color = color_yellow;
 			if(is_new == true)
 			{
-			pos_last_x = push_pos_loc.x;
-			pos_last_y = push_pos_loc.y;
-			is_new = false;
+			  pos_last_y = push_pos_loc.y;
+			  std::cout<<pos_last_y<<"\n";
+			  is_new = false;
 			}
 			
-			if(pos_last_x < (push_pos_loc.x - th) || pos_last_y < (push_pos_loc.y - th))
+			if(push_pos_loc.y < (pos_last_y-th) && is_new == false)
 			{
-				if(speed>1)
+			
+				speed = speed - 1;
+			  std::cout<<push_pos_loc.y - th<<"\n------\n";	
+			  is_new = true;
+			  if(speed<2)
 				{
-				speed = speed - 0;
+				1;
 				}
-			is_new = true;
-			}
-			if(pos_last_x > (push_pos_loc.x + th) || pos_last_y > (push_pos_loc.y + th))
+				
+			}else if(push_pos_loc.y > (pos_last_y+th) && is_new == false)
 			{
-				if(speed<10)
-				{
+				
 				speed = speed + 1;
+			  is_new = true;
+			  std::cout<<push_pos_loc.y + th<<"\n+++++++++\n";
+			  if(speed>10)
+				{
+				speed = 10;
 				}
-			is_new = true;
+			}else{
+			
 			}
 		}
 		else 
 		{
 		marker.color = color_red;
 		}
-		if(speed>0){
-		marker.scale.x = 0.01*speed;
+		*/
+		
+		if(compare(push_pcl_2, push_pos_2))
+		{ 
+			if(push_pos_loc.y > 300 && speed > 2){
+			
+			speed--;
+			
+			}
+			if(push_pos_loc.y < 300 && speed < 10){
+			
+			speed++; 
+			
+			}
 		}
+		
+		if(speed>0 && speed<10){
+		marker.scale.x = 0.01*speed;
+		}else{
+		marker.scale.x = 0.1;
+		}
+	
 		marker_pub.publish(marker);//Publish the shape
 		
 	
@@ -553,12 +580,12 @@ void publishInformation()
     marker.type = visualization_msgs::Marker::TEXT_VIEW_FACING;
     marker.action = visualization_msgs::Marker::ADD;
     marker.header.frame_id = "table";
-    marker.lifetime = ros::Duration();
 		marker.pose.position.x = info_offset_x_3 + 0.40; //was 0.11
   	marker.pose.position.y = 0.55 + info_offset_y_3; //was 0.68
   	marker.pose.position.z = 0.01;
     marker.scale.z = 0.05;
     marker.color = color_white;
+    marker.lifetime = ros::Duration(LIFETIME_PERMANENT);
     
     
     //Typecasting int to string
@@ -568,9 +595,9 @@ void publishInformation()
  		//Print speed
     ss_3.str("");
     ss_3.clear();
-    ss_3 << speed <<"0%";
+    ss_3 << speed;
 		out_string_3 = ss_3.str();
- 		marker.text = out_string_3;  	  	
+ 		marker.text = out_string_3 + "0%";  	  	
      	
     marker_pub.publish(marker);//Publish the text marker
 		
@@ -601,6 +628,7 @@ int main( int argc, char** argv )
   release_2 = true;
   is_new = true;
   speed = 10;
+  th = 50;
   
   ros::Rate loop_rate(10);
   
