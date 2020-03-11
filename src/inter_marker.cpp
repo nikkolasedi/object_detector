@@ -1,6 +1,7 @@
 #include <ros/ros.h>
 #include <visualization_msgs/Marker.h>
 #include <std_msgs/Float32.h>
+#include <std_msgs/Float64.h>
 #include <std_msgs/Bool.h>
 #include <sstream>
 #include <iostream>
@@ -18,6 +19,7 @@ bool push_pos_2;
 bool release_1;
 bool release_2;
 std_msgs::Bool push_robot_running;
+std_msgs::Float64 push_speed_factor;
 
 //Subscribe to PCL_MVal topic
   ros::Subscriber pcl_sub_1;
@@ -31,6 +33,8 @@ std_msgs::Bool push_robot_running;
   ros::Publisher marker_pub; 
   //Create and define a publisher
   ros::Publisher robot_running_pub; 
+  //Create and define a publisher
+  ros::Publisher speed_factor_pub; 
 
 // Temporary Variable
 int var_1;
@@ -554,6 +558,9 @@ void publishInformation()
 		
 		if(compare(push_pcl_2, push_pos_2))
 		{ 
+		
+			ros::param::set("~scaling_enabled", true);
+			
 			if(push_pos_loc.y > 300 && speed > 2){
 			
 			speed--;
@@ -564,16 +571,23 @@ void publishInformation()
 			speed++; 
 			
 			}
+		}else{
+		
+			ros::param::set("~scaling_enabled", false);
+			
 		}
 		
 		if(speed>0 && speed<10){
 		marker.scale.x = 0.01*speed;
+		push_speed_factor.data = speed*0.1;
+		
 		}else{
 		marker.scale.x = 0.1;
+		push_speed_factor.data = 1;
 		}
-	
-		marker_pub.publish(marker);//Publish the shape
 		
+		marker_pub.publish(marker);//Publish the shape
+		speed_factor_pub.publish(push_speed_factor);//Publish the speed_factor
 	
 		// Create a text marker for speed
     marker.id = marker_id++;
@@ -622,6 +636,8 @@ int main( int argc, char** argv )
   marker_pub = n.advertise<visualization_msgs::Marker>("visualization_marker", 1);
   //Create and define a publisher
   robot_running_pub = n.advertise<std_msgs::Bool>("robot_running", 1);
+  //Create and define a publisher
+  speed_factor_pub = n.advertise<std_msgs::Float64>("speed_factor", 1);
   var_1 = 1;
   var_2 = 1;
   release_1 = true;
