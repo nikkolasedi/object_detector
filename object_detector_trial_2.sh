@@ -130,7 +130,8 @@ if [ $sample = true ]
 then
 tmux send-keys "rosbag play 4_hand_left.bag --loop" ENTER
 else
-tmux send-keys "rosrun uvc_camera uvc_camera_node _device:=/dev/video0" ENTER
+tmux send-keys "" ENTER
+#tmux send-keys "rosrun uvc_camera uvc_camera_node _device:=/dev/video0" ENTER
 fi
 
 # NAME11
