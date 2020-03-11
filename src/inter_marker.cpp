@@ -403,8 +403,8 @@ int main( int argc, char** argv )
 		marker_pub.publish(marker);//Publish the shape
 		
 		
-		
-		
+
+		/*
 		
 		////////////////////////////////////////////////////////////////////
 		
@@ -459,18 +459,18 @@ int main( int argc, char** argv )
     marker.pose.position.z = 0.01;
     marker.scale.z = 0.03;
     marker.color = color_green;
-    marker.text = "Press to \nchange speed"; //Display text
+    marker.text = "Press to change speed"; //Display text
     
       // Change text if receiving an input   
     if(push_2.data == true && push_loc_2.data == true){
       
  		  marker.text = "";
-    	ROS_INFO("Release to \nset the speed");
+    	ROS_INFO("Release to set the speed");
       
     	}else{
       
-    	marker.text = "Press to \nchange speed";
-    	ROS_INFO("Press to \nchange speed");
+    	marker.text = "Press to change speed";
+    	ROS_INFO("Press to change speed");
       
     	}
   
@@ -626,8 +626,6 @@ int main( int argc, char** argv )
   	marker.scale.x = 0.02;
   	
   	marker.scale.z = 0.05;
-  	
-  	marker.color = color_yellow;
   
   	marker.lifetime = ros::Duration();
 		
@@ -645,7 +643,7 @@ int main( int argc, char** argv )
 			
 			if(pos_last_x < (push_pos.x - th) || pos_last_y < (push_pos.y - th))
 			{
-				if(speed>0.0)
+				if(speed>0.2)
 				{
 				speed = speed - 0.1;
 				}
@@ -664,7 +662,7 @@ int main( int argc, char** argv )
 		{
 		marker.color = color_red;
 		}
-		marker.scale.y = 0.1*speed+0.01;
+		marker.scale.y = speed+0.1;
 		
 		marker_pub.publish(marker);//Publish the shape
 		
@@ -688,15 +686,15 @@ int main( int argc, char** argv )
 		std::stringstream ss_3;
 		
  		//Print speed
-    ss.str("");
-    ss.clear();
-    ss << speed;
-		out_string = ss.str();
- 		marker.text = out_string;  	  	
+    ss_3.str("");
+    ss_3.clear();
+    ss_3 << speed;
+		out_string_3 = ss_3.str();
+ 		marker.text = out_string_3;  	  	
      	
     marker_pub.publish(marker);//Publish the text marker
-		
-		
+		*/
+	
     
     
     ros::spinOnce();
