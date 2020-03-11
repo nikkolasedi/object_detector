@@ -41,7 +41,7 @@ int var_1;
 int var_2;
 int temp_var;
 bool is_new;
-int speed;
+float speed;
 
 // Threshold
 int th;
@@ -61,10 +61,10 @@ float info_offset_x_2 = -0.06;
 float info_offset_y_2 = -0.3;
 
 //Set info_offset_x slider 1
-float info_offset_x_3 = -0.06;
+float info_offset_x_3 = -0.07;
 
 //Set info_offset_y slider 1
-float info_offset_y_3 = -0.1;
+float info_offset_y_3 = -0.13;
 
 //Set lifetime
 double LIFETIME_PERMANENT = 0;
@@ -193,10 +193,10 @@ void publishInformation()
     marker.action = visualization_msgs::Marker::ADD;
     marker.header.frame_id = "table";
     marker.lifetime = ros::Duration();
-    marker.pose.position.x = info_offset_x + 0.40;
-    marker.pose.position.y = 0.60 + info_offset_y;
+    marker.pose.position.x = info_offset_x + 0.38;
+    marker.pose.position.y = info_offset_y + 0.60;
     marker.pose.position.z = 0.01;
-    marker.scale.z = 0.03;
+    marker.scale.z = 0.02;
     marker.color = color_green;
     
       // Change text if receiving an input   
@@ -277,11 +277,11 @@ void publishInformation()
   	//Print count down
     if(compare(push_pcl_1, push_pos_1)){
     
-    	size = size + size;
+    	size = 0.13;
     	
     	}else {
     	
- 		  size = 0.05;
+ 		  size = 0.105;
  		  
     	}
     
@@ -363,10 +363,10 @@ void publishInformation()
     marker.action = visualization_msgs::Marker::ADD;
     marker.header.frame_id = "table";
     marker.lifetime = ros::Duration();
-    marker.pose.position.x = info_offset_x_2 + 0.43;
+    marker.pose.position.x = info_offset_x_2 + 0.39;
     marker.pose.position.y = 0.60 + info_offset_y_2;
     marker.pose.position.z = 0.01;
-    marker.scale.z = 0.03;
+    marker.scale.z = 0.02;
     marker.color = color_green;
     marker.text = "Press to\nchange speed"; //Display text
     
@@ -439,11 +439,11 @@ void publishInformation()
   	//Print count down
     if(compare(push_pcl_2, push_pos_2)){
     
-    	size2 = size2 + size2;
+    	size2 = 0.13;
     	
     	}else {
     	
- 		  size2 = 0.05;
+ 		  size2 = 0.105;
  		  
     	}
     
@@ -559,33 +559,33 @@ void publishInformation()
 		if(compare(push_pcl_2, push_pos_2))
 		{ 
 		
-			ros::param::set("~scaling_enabled", true);
+			//ros::param::set("~scaling_enabled", true);
 			
-			if(push_pos_loc.y > 300 && speed > 2){
+			if(push_pos_loc.y > 330 && speed > 2){
 			
-			speed--;
+			speed = speed - 0.5;
 			
 			}
-			if(push_pos_loc.y < 300 && speed < 10){
+			if(push_pos_loc.y < 270 && speed < 10){
 			
-			speed++; 
+			speed = speed + 0.5; 
 			
 			}
 		}else{
 		
-			ros::param::set("~scaling_enabled", false);
+			//ros::param::set("~scaling_enabled", false);
 			
 		}
 		
 		if(speed>0 && speed<10){
 		marker.scale.x = 0.01*speed;
 		push_speed_factor.data = speed*0.1;
-		
 		}else{
+		speed = 10;
 		marker.scale.x = 0.1;
-		push_speed_factor.data = 1;
 		}
 		
+		std::cout<< speed*0.1 << "\n";
 		marker_pub.publish(marker);//Publish the shape
 		speed_factor_pub.publish(push_speed_factor);//Publish the speed_factor
 	
@@ -594,8 +594,8 @@ void publishInformation()
     marker.type = visualization_msgs::Marker::TEXT_VIEW_FACING;
     marker.action = visualization_msgs::Marker::ADD;
     marker.header.frame_id = "table";
-		marker.pose.position.x = info_offset_x_3 + 0.40; //was 0.11
-  	marker.pose.position.y = 0.55 + info_offset_y_3; //was 0.68
+		marker.pose.position.x = info_offset_x_3 + 0.39; //was 0.11
+  	marker.pose.position.y = 0.52 + info_offset_y_3; //was 0.68
   	marker.pose.position.z = 0.01;
     marker.scale.z = 0.05;
     marker.color = color_white;
@@ -609,9 +609,9 @@ void publishInformation()
  		//Print speed
     ss_3.str("");
     ss_3.clear();
-    ss_3 << speed;
+    ss_3 << speed*10;
 		out_string_3 = ss_3.str();
- 		marker.text = out_string_3 + "0%";  	  	
+ 		marker.text = out_string_3 + "%";  	  	
      	
     marker_pub.publish(marker);//Publish the text marker
 		
@@ -646,7 +646,7 @@ int main( int argc, char** argv )
   speed = 10;
   th = 50;
   
-  ros::Rate loop_rate(10);
+  ros::Rate loop_rate(15);
   
   while (ros::ok())
   {
