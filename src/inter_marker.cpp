@@ -7,6 +7,7 @@
 #include <iostream>
 #include <geometry_msgs/Point.h>
 #include <std_srvs/Trigger.h>
+#include <visualization_msgs/MarkerArray.h>
 
 
 //Create a container
@@ -19,6 +20,7 @@ bool push_pos_1;
 bool push_pos_2;
 bool release_1;
 bool release_2;
+bool recover;
 std_msgs::Bool push_robot_running;
 std_msgs::Float64 push_speed_factor;
 std_srvs::Trigger srv;
@@ -47,6 +49,7 @@ bool temp_var;
 bool new_var;
 bool is_new;
 float speed;
+float old_speed;
 
 // Threshold
 int th;
@@ -130,8 +133,10 @@ bool compare(bool a, bool b) {
 
 void publishInformation()
 {
-    int marker_id = 0;
-    
+		visualization_msgs::MarkerArray marker_array;
+
+    int marker_id = 0;    
+
     visualization_msgs::Marker marker;
     
     //std_srvs::Trigger srv;
@@ -191,7 +196,7 @@ void publishInformation()
        release_1 = true;
     }
     	
-		marker_pub.publish(marker);//Publish the shape
+		marker_array.markers.push_back(marker);// add marker to marker_array
   	
   	
     // Create a text marker for Status
@@ -220,7 +225,7 @@ void publishInformation()
     		}
 
   
-    marker_pub.publish(marker);//Publish the text marker
+   	marker_array.markers.push_back(marker);// add marker to marker_array
     
     // Create a text marker on button for the count down
     marker.id = marker_id++;
@@ -258,7 +263,7 @@ void publishInformation()
     		}
 
     	
-    marker_pub.publish(marker);//Publish the text marker
+    	marker_array.markers.push_back(marker);// add marker to marker_array
     /*
 		if(temp_var != push_robot_running.data){
 		
@@ -321,7 +326,7 @@ void publishInformation()
   	marker.color = color_yellow;
     		
   
-		marker_pub.publish(marker);//Publish the shape
+			marker_array.markers.push_back(marker);// add marker to marker_array
 		
 		
 		
@@ -365,17 +370,12 @@ void publishInformation()
     		}
     		
     release_2 = false;
+    marker.color = color_blue;
     	
+    }else{
+    marker.color = color_red;
     }
     
-    switch(var_2){ 
-    	case 1: 
-    		marker.color = color_red;
-    		break;
-    	case 2:
-    		marker.color = color_blue;
-    		break;
-    		}
     	
     
     	
@@ -384,7 +384,7 @@ void publishInformation()
     	release_2 = true;
     }
   
-		marker_pub.publish(marker);//Publish the shape
+			marker_array.markers.push_back(marker);// add marker to marker_array
   	
   	
     // Create a text marker for Status
@@ -398,7 +398,7 @@ void publishInformation()
     marker.pose.position.z = 0.01;
     marker.scale.z = 0.02;
     marker.color = color_green;
-    marker.text = "Press to\nchange speed"; //Display text
+    marker.text = "Hold to\nchange speed"; //Display text
     
       // Change text if receiving an input   
     if(compare(push_pcl_2, push_pos_2)){
@@ -413,7 +413,7 @@ void publishInformation()
       
     	}
   
-    marker_pub.publish(marker);//Publish the text marker
+   	marker_array.markers.push_back(marker);// add marker to marker_array
 
     marker.id = marker_id++;
     marker.type = visualization_msgs::Marker::TEXT_VIEW_FACING;
@@ -435,20 +435,16 @@ void publishInformation()
     if(compare(push_pcl_2, push_pos_2))
     {
  		  
- 		  switch(var_2)
- 		  	{ 
-    	case 1: 
-    		marker.text = "OFF";
-    		break;
-    	case 2:
-    		marker.text = "ON";
-    		break;
-    		}
+ 		  marker.text = "^^";
     		
-    }
-    marker.text = ">>";
+    }else{
     	
-    marker_pub.publish(marker);//Publish the text marker
+    	marker.text = ">>";
+    
+    }
+
+    	
+   	marker_array.markers.push_back(marker);// add marker to marker_array
     
    // publish a Cylinder for animation, when the button pressed
  	 	marker.id = marker_id++;
@@ -483,7 +479,7 @@ void publishInformation()
   	marker.color = color_yellow;
     		
   
-		marker_pub.publish(marker);//Publish the shape
+			marker_array.markers.push_back(marker);// add marker to marker_array
 		
 		/*
 		// publish a outer Cube for animation for speed scaling
@@ -585,13 +581,31 @@ void publishInformation()
 		marker.color = color_red;
 		}
 		*/
+		if(recover == true){
+			
+			if(speed < old_speed){
+			
+			if(speed < 0.5){
+			speed = speed + 0.01;
+			}else{
+			speed = speed + 0.5;
+			}
+			speed_factor_pub.publish(push_speed_factor);//Publish the speed_factor
+			}else{
+			
+			speed = old_speed;
+			recover = false;
+			
+			}
+	
+		}
 		
 		if(compare(push_pcl_2, push_pos_2))
 		{ 
 		
 			//ros::param::set("~scaling_enabled", true);
 			
-			if(push_pos_loc.y > 330 && speed > 2){
+			if(push_pos_loc.y > 330 && speed > 1){
 			
 			speed = speed - 0.5;
 			
@@ -607,12 +621,16 @@ void publishInformation()
 		
 			//ros::param::set("~scaling_enabled", false);
 			
+
 		}
 		
 		if(speed>0 && speed<10){
 		
 		marker.scale.x = 0.01*speed;
 		push_speed_factor.data = speed*0.1;
+		  
+		  
+		 
 		
 		if(compare(push_pcl_2, push_pos_2)){
 			
@@ -629,7 +647,7 @@ void publishInformation()
 		}
 		
 		
-		marker_pub.publish(marker);//Publish the shape
+			marker_array.markers.push_back(marker);// add marker to marker_array
 		
 	
 		// Create a text marker for speed
@@ -656,7 +674,9 @@ void publishInformation()
 		out_string_3 = ss_3.str();
  		marker.text = out_string_3 + "%";  	  	
      	
-    marker_pub.publish(marker);//Publish the text marker
+    marker_array.markers.push_back(marker);// add marker to marker_array 	
+    
+    marker_pub.publish(marker_array);//Publish the text marker_array
 		
 }
 
@@ -675,7 +695,9 @@ int main( int argc, char** argv )
   //Subscribe to pose_pub topic
   pos_loc_sub = n.subscribe ("pose_pub2", 1, pos_loc_callback);
   //Create and define a publisher
-  marker_pub = n.advertise<visualization_msgs::Marker>("visualization_marker", 1);
+  //marker_pub = n.advertise<visualization_msgs::Marker>("visualization_marker", 1);
+  //Create and define a publisher
+  marker_pub = n.advertise<visualization_msgs::MarkerArray>("visualization_marker", 1);
   //Create and define a publisher
   robot_running_pub = n.advertise<std_msgs::Bool>("robot_running", 1);
   //Create and define a publisher
@@ -691,6 +713,7 @@ int main( int argc, char** argv )
   speed = 10;
   th = 50;
   temp_var = true;
+  recover = false;
   
   
   ros::Rate loop_rate(15);
@@ -707,10 +730,15 @@ int main( int argc, char** argv )
 		switch(var_1)
  		  	{ 
     	case 1: 
+    		old_speed = speed;
+    	  speed = 0.0;
+    	  recover = true;
     		client = n.serviceClient<std_srvs::Trigger>("/ur_hardware_interface/dashboard/play");
+    	  
     		break;
     		
     	case 2:
+    	  
     		client = n.serviceClient<std_srvs::Trigger>("/ur_hardware_interface/dashboard/pause");
     		break;
     		
@@ -730,7 +758,13 @@ int main( int argc, char** argv )
 		    temp_var = new_var;
     		//robot_running_pub.publish(push_robot_running);//Publish the value of push_robot_running
     		//std::cout<<"push_robot_running.data ="<<temp_var<<".\n";
-    		}	
+    		}
+    
+ 
+  
+    
+    std::cout<<"speed="<<speed<<"old_speed="<<old_speed<<".\n";
+    		
 
     loop_rate.sleep();
     ros::spinOnce();
