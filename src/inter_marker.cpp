@@ -6,6 +6,7 @@
 #include <sstream>
 #include <iostream>
 #include <geometry_msgs/Point.h>
+#include <std_srvs/Trigger.h>
 
 
 //Create a container
@@ -20,6 +21,7 @@ bool release_1;
 bool release_2;
 std_msgs::Bool push_robot_running;
 std_msgs::Float64 push_speed_factor;
+std_srvs::Trigger srv;
 
 //Subscribe to PCL_MVal topic
   ros::Subscriber pcl_sub_1;
@@ -35,11 +37,14 @@ std_msgs::Float64 push_speed_factor;
   ros::Publisher robot_running_pub; 
   //Create and define a publisher
   ros::Publisher speed_factor_pub; 
+  //Service call
+  ros::ServiceClient client;
 
 // Temporary Variable
 int var_1;
 int var_2;
-int temp_var;
+bool temp_var;
+bool new_var;
 bool is_new;
 float speed;
 
@@ -128,6 +133,8 @@ void publishInformation()
     int marker_id = 0;
     
     visualization_msgs::Marker marker;
+    
+    //std_srvs::Trigger srv;
     
     /// robot_running Button ///
     
@@ -239,10 +246,12 @@ void publishInformation()
     	case 1: 
     		marker.text = "OFF";
     		push_robot_running.data = true;
+    		new_var = true;
     		break;
     	case 2:
     		marker.text = "ON";
     		push_robot_running.data = false;
+    		new_var = false;
     		break;
     	default:
     		marker.text = "Error";
@@ -250,13 +259,34 @@ void publishInformation()
 
     	
     marker_pub.publish(marker);//Publish the text marker
-    
+    /*
 		if(temp_var != push_robot_running.data){
+		
+		switch(var_1)
+ 		  	{ 
+    	case 1: 
+    		client = n.serviceClient<std_srvs::Trigger>("/ur_hardware_interface/dashboard/play");
+   		
+    		break;
+    	case 2:
+    		client = n.serviceClient<std_srvs::Trigger>("/ur_hardware_interface/dashboard/pause");
+    		break;
+    		}
+    		
+    if (client.call(srv))
+  			{
+    		ROS_INFO("success: %d \n message: %s", srv.response.success, srv.response.message);
+  			}
+  			else
+  			{
+    		ROS_ERROR("Failed to call service");
+  			}
+  			
 		    temp_var = push_robot_running.data;
     		robot_running_pub.publish(push_robot_running);//Publish the value of push_robot_running
     		std::cout<<"push_robot_running.data ="<<temp_var<<".\n";
-    		}
-    
+    		}	
+    */
     
    // publish a Cylinder for animation, when the button pressed
  	 	marker.id = marker_id++;
@@ -571,6 +601,8 @@ void publishInformation()
 			speed = speed + 0.5; 
 			
 			}
+			
+			
 		}else{
 		
 			//ros::param::set("~scaling_enabled", false);
@@ -578,16 +610,27 @@ void publishInformation()
 		}
 		
 		if(speed>0 && speed<10){
+		
 		marker.scale.x = 0.01*speed;
 		push_speed_factor.data = speed*0.1;
+		
+		if(compare(push_pcl_2, push_pos_2)){
+			
+			std::cout<< speed*0.1 << "\n";
+			speed_factor_pub.publish(push_speed_factor);//Publish the speed_factor
+			
+			}
+		
 		}else{
+		
 		speed = 10;
 		marker.scale.x = 0.1;
+		
 		}
 		
-		std::cout<< speed*0.1 << "\n";
+		
 		marker_pub.publish(marker);//Publish the shape
-		speed_factor_pub.publish(push_speed_factor);//Publish the speed_factor
+		
 	
 		// Create a text marker for speed
     marker.id = marker_id++;
@@ -623,7 +666,6 @@ int main( int argc, char** argv )
 {
   ros::init(argc, argv, "inter_marker");
   ros::NodeHandle n;
-  ros::NodeHandle nh;
   //Subscribe to PCL_MVal topic
   pcl_sub_1 = n.subscribe ("PCL_MVal_1", 1, pcl_callback_1);
   pcl_sub_2 = n.subscribe ("PCL_MVal_2", 1, pcl_callback_2);
@@ -638,6 +680,9 @@ int main( int argc, char** argv )
   robot_running_pub = n.advertise<std_msgs::Bool>("robot_running", 1);
   //Create and define a publisher
   speed_factor_pub = n.advertise<std_msgs::Float64>("speed_factor", 1);
+  //Service call
+  
+
   var_1 = 1;
   var_2 = 1;
   release_1 = true;
@@ -645,6 +690,8 @@ int main( int argc, char** argv )
   is_new = true;
   speed = 10;
   th = 50;
+  temp_var = true;
+  
   
   ros::Rate loop_rate(15);
   
@@ -654,6 +701,36 @@ int main( int argc, char** argv )
     ros::spinOnce();
     
     publishInformation();
+    
+    if(temp_var != new_var){
+		
+		switch(var_1)
+ 		  	{ 
+    	case 1: 
+    		client = n.serviceClient<std_srvs::Trigger>("/ur_hardware_interface/dashboard/play");
+    		break;
+    		
+    	case 2:
+    		client = n.serviceClient<std_srvs::Trigger>("/ur_hardware_interface/dashboard/pause");
+    		break;
+    		
+    		}
+    		
+    if (client.call(srv))
+  			{
+    		ROS_INFO("success: %d \n message: %s", srv.response.success, srv.response.message);
+  			}
+  			else
+  			{
+    		ROS_ERROR("Failed to call service");
+  			}
+  			std::cout<<"temp_var: "<<temp_var<<"\n";
+  			std::cout<<"temp_var: "<<new_var<<"\n";
+  			
+		    temp_var = new_var;
+    		//robot_running_pub.publish(push_robot_running);//Publish the value of push_robot_running
+    		//std::cout<<"push_robot_running.data ="<<temp_var<<".\n";
+    		}	
 
     loop_rate.sleep();
     ros::spinOnce();
