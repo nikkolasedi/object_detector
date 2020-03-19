@@ -5,9 +5,11 @@
 #include <pcl/point_cloud.h>
 #include <pcl/point_types.h>
 #include <pcl/filters/voxel_grid.h>
+#include <pcl/filters/crop_box.h>
 
 // Create publisher
 ros::Publisher pub;
+
 
 void 
 cloud_cb (const sensor_msgs::PointCloud2ConstPtr& cloud_msg)
@@ -25,7 +27,7 @@ cloud_cb (const sensor_msgs::PointCloud2ConstPtr& cloud_msg)
   sor.setInputCloud (cloudPtr);
   sor.setLeafSize (0.01, 0.01, 0.01);
   sor.filter (cloud_filtered);
-
+  
   // Convert to ROS data type
   sensor_msgs::PointCloud2 output;
   pcl_conversions::fromPCL(cloud_filtered, output);

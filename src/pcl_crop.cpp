@@ -11,6 +11,7 @@
  // Create publisher
  ros::Publisher pub_1; 	        //for PCL
  ros::Publisher pub_2;
+ros::Publisher pub_3;
  ros::Publisher pcl_mval_pub_1; 	//for the number of PCL
  ros::Publisher pcl_mval_pub_2;
  std_msgs::Bool state_1;
@@ -124,6 +125,36 @@ void cloud_cb_2 (const sensor_msgs::PointCloud2ConstPtr& cloud_msg)
  
  }
 
+
+
+void cloud_cb_3 (const sensor_msgs::PointCloud2ConstPtr& cloud_msg)
+ {
+ 
+ // Create container
+ pcl::PCLPointCloud2* cloud = new pcl::PCLPointCloud2;
+ pcl::PCLPointCloud2ConstPtr cloudPtr(cloud);
+ pcl::PCLPointCloud2 cloud_filtered;
+
+ // Convert type sensor_msgs to pcl
+ pcl_conversions::toPCL(*cloud_msg, *cloud);
+
+ // Crop the PCL
+ pcl::CropBox<pcl::PCLPointCloud2> boxFilter;
+ boxFilter.setInputCloud(cloudPtr);
+ boxFilter.setMin(Eigen::Vector4f(0.0, 0.0, 0.0, 0));
+ boxFilter.setMax(Eigen::Vector4f(0.75, 3.0, 1.5, 0));
+ boxFilter.setTranslation(Eigen::Vector3f(-0.25, -1, 0.5));
+ //boxFilter.setRotation(Eigen::Vector3f(0.1, 0.0, 0.0));
+ boxFilter.filter(cloud_filtered);
+
+ // Convert back the type
+ sensor_msgs::PointCloud2 output;
+ pcl_conversions::fromPCL(cloud_filtered, output);
+
+pub_3.publish (output);
+ 
+ }
+
  int main (int argc, char** argv)
 {
 // Initialize ROS
@@ -133,10 +164,12 @@ ros::NodeHandle nh;
 // Create a ROS subscriber for the input point cloud
 ros::Subscriber sub_1 = nh.subscribe ("Cloud_Filtered", 1, cloud_cb_1);
 ros::Subscriber sub_2 = nh.subscribe ("Cloud_Filtered", 1, cloud_cb_2);
+ros::Subscriber sub_3 = nh.subscribe ("camera5/depth/points", 1, cloud_cb_3);
 
 // Create a ROS publisher for the output point cloud
 pub_1 = nh.advertise<sensor_msgs::PointCloud2> ("/Cloud_Cropped_1", 1);
 pub_2 = nh.advertise<sensor_msgs::PointCloud2> ("/Cloud_Cropped_2", 1);
+pub_3 = nh.advertise<sensor_msgs::PointCloud2> ("/Cloud_Cropped_3", 1);
 pcl_mval_pub_1 = nh.advertise<std_msgs::Bool> ("/PCL_MVal_1", 1);
 pcl_mval_pub_2 = nh.advertise<std_msgs::Bool> ("/PCL_MVal_2", 1);
 // Spin
